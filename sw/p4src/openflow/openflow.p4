@@ -284,7 +284,7 @@ table ofpat_group_ingress {
 action ofpat_output(egress_port) {
     modify_field(ingress_egress_port, egress_port);
 // for switch.p4
-//    modify_field(ingress_metadata.egress_ifindex, 0);
+    modify_field(ingress_metadata.egress_ifindex, 0);
 }
 
 table ofpat_output {
@@ -299,6 +299,264 @@ table ofpat_output {
         nop;
     }
 }
+
+// Unable MPLS
+
+#ifdef OPENFLOW_ENABLE_MPLS
+/***************************************************************
+ * OFPAT_SET_MPLS_TTL
+ ***************************************************************/
+
+action ofpat_set_mpls_ttl(ttl) {
+    modify_field(mpls[0].ttl, ttl);
+}
+
+table ofpat_set_mpls_ttl {
+    reads {
+        openflow_metadata.index : ternary;
+        openflow_metadata.group_id : ternary;
+        egress_egress_port : ternary;
+    }
+
+    actions {
+        ofpat_set_mpls_ttl;
+        nop;
+    }
+}
+
+ /***************************************************************
+ * OFPAT_DEC_MPLS_TTL
+ ***************************************************************/
+
+action ofpat_dec_mpls_ttl() {
+    add_to_field(mpls[0].ttl, -1);
+}
+
+table ofpat_dec_mpls_ttl {
+    reads {
+        openflow_metadata.index : ternary;
+        openflow_metadata.group_id : ternary;
+        egress_egress_port : ternary;
+    }
+
+    actions {
+        ofpat_dec_mpls_ttl;
+        nop;
+    }
+}
+
+/****************************************************************
+ * OFPAT_PUSH_MPLS
+ ****************************************************************/
+
+action ofpat_push_mpls() {
+    modify_field(ethernet.etherType, 0x8847);
+    add_header(mpls[0]);
+}
+
+table ofpat_push_mpls {
+    reads {
+        openflow_metadata.index : ternary;
+        openflow_metadata.group_id : ternary;
+        egress_egress_port : ternary;
+    }
+
+    actions {
+        ofpat_push_mpls;
+        nop;
+    }
+}
+
+/***************************************************************
+ * OFPAT_POP_MPLS
+ ***************************************************************/
+
+action ofpat_pop_mpls() {
+    remove_header(mpls[0]);
+}
+
+table ofpat_pop_mpls {
+    reads {
+        openflow_metadata.index : ternary;
+        openflow_metadata.group_id : ternary;
+        egress_egress_port : ternary;
+    }
+
+    actions {
+        ofpat_pop_mpls;
+        nop;
+    }
+}
+#endif /* OPENFLOW_ENABLE_MPLS */
+
+// Unable VLAN
+
+#ifdef OPENFLOW_ENABLE_VLAN
+/***************************************************************
+ * OFPAT_PUSH_VLAN
+ ***************************************************************/
+
+action ofpat_push_vlan() {
+    modify_field(ethernet.etherType, 0x8100);
+    add_header(vlan_tag_[0]);
+    modify_field(vlan_tag_[0].etherType, 0x0800);
+}
+
+table ofpat_push_vlan {
+    reads {
+        openflow_metadata.index : ternary;
+        openflow_metadata.group_id : ternary;
+        egress_egress_port : ternary;
+    }
+
+    actions {
+        ofpat_push_vlan;
+        nop;
+    }
+}
+
+/***************************************************************
+ * OFPAT_POP_VLAN
+ ***************************************************************/
+
+action ofpat_pop_vlan() {
+    modify_field(ethernet.etherType, vlan_tag_[0].etherType);
+    remove_header(vlan_tag_[0]);
+}
+
+table ofpat_pop_vlan {
+    reads {
+        openflow_metadata.index : ternary;
+        openflow_metadata.group_id : ternary;
+        egress_egress_port : ternary;
+    }
+    
+    actions {
+        ofpat_pop_vlan;
+        nop;
+    }
+}
+
+/***************************************************************
+ * OFPAT_SET_FIELD
+ ***************************************************************/
+
+action ofpat_set_vlan_vid(vid) {
+    modify_field(vlan_tag_[0].vid, vid);
+}
+
+table ofpat_set_field {
+    reads {
+        openflow_metadata.index : ternary;
+        openflow_metadata.group_id : ternary;
+        egress_egress_port : ternary;
+    }
+
+    actions {
+        ofpat_set_vlan_vid;
+        nop;
+    }
+}
+
+#endif /* OPENFLOW_ENABLE_VLAN */
+
+/****************************************************************
+ * OFPAT_SET_QUEUE
+ ****************************************************************/
+
+
+ // L3 => TODO:
+
+ // Hint: If need L3, please define the headers and parsers of 
+ // ipv4 and ipv6.
+
+ // Unable L3
+
+#ifdef OPENFLOW_ENABLE_L3
+/***************************************************************
+ * OFPAT_SET_NW_TTL IPV4
+ ***************************************************************/
+
+action ofpat_set_nw_ttl_ipv4(ttl) {
+    modify_field(ipv4.ttl, ttl);
+}
+
+table ofpat_set_nw_ttl_ipv4 {
+    reads {
+        openflow_metadata.index : ternary;
+        openflow_metadata.group_id : ternary;
+        egress_egress_port : ternary;
+    }
+
+    actions {
+        ofpat_set_nw_ttl_ipv4;
+        nop;
+    }
+}
+
+/***************************************************************
+ * OFPAT_SET_NW_TTL IPV6
+ ***************************************************************/
+
+action ofpat_set_nw_ttl_ipv6(ttl) {
+    modify_field(ipv6.hopLimit, ttl);
+}
+
+table ofpat_set_nw_ttl_ipv6 {
+    reads {
+        openflow_metadata.index : ternary;
+        openflow_metadata.group_id : ternary;
+        egress_egress_port : ternary;
+    }
+
+    actions {
+        ofpat_set_nw_ttl_ipv6;
+        nop;
+    }
+}
+
+/***************************************************************
+ * OFPAT_DEC_NW_TTL IPV4
+ ***************************************************************/
+
+action ofpat_dec_nw_ttl_ipv4() {
+    add_to_field(ipv4.ttl, -1);
+}
+
+table ofpat_dec_nw_ttl_ipv4 {
+    reads {
+        openflow_metadata.index : ternary;
+        openflow_metadata.group_id : ternary;
+        egress_egress_port : ternary;
+    }
+
+    actions {
+        ofpat_dec_nw_ttl_ipv4;
+        nop;
+    }
+}
+
+/***************************************************************
+ * OFPAT_DEC_NW_TTL IPV6
+ ***************************************************************/
+
+action ofpat_dec_nw_ttl_ipv6(ttl) {
+    add_to_field(ipv6.hopLimit, -1);
+}
+
+table ofpat_dec_nw_ttl_ipv6 {
+    reads {
+        openflow_metadata.index : ternary;
+        openflow_metadata.group_id : ternary;
+        egress_egress_port : ternary;
+    }
+
+    actions {
+        ofpat_dec_nw_ttl_ipv6;
+        nop;
+    }
+}
+#endif /* OPENFLOW_ENABLE_L3 */
 
 /***************************************************************
  * Main control block
@@ -316,6 +574,67 @@ control process_ofpat_ingress {
 
 control process_ofpat_egress {
     apply(ofpat_group_egress);
+
+    // Hint: Option: MPLS, VLAN, L3.
+    // If need, please change Line:
+    // L22, L23, L24.
+
+    // MPLS: L291-L376
+    // VLAN: L380-L477
+    // L3: L468-L559
+
+#ifdef OPENFLOW_ENABLE_MPLS
+    if (openflow_metadata.bmap & 0x100000 == 0x100000) {
+        apply(ofpat_pop_mpls);
+    }
+
+    if (openflow_metadata.bmap & 0x80000 == 0x80000) {
+        apply(ofpat_push_mpls);
+    }
+
+    if (openflow_metadata.bmap & 0x10000 == 0x10000) {
+        apply(ofpat_dec_mpls_ttl);
+    }
+
+    if (openflow_metadata.bmap & 0x8000 == 0x8000) {
+        apply(ofpat_set_mpls_ttl);
+    }
+#endif /* OPENFLOW_ENABLE_MPLS */
+#ifdef OPENFLOW_ENABLE_VLAN
+    if (openflow_metadata.bmap & 0x40000 == 0x40000) {
+        apply(ofpat_pop_vlan);
+    }
+
+    if (openflow_metadata.bmap & 0x20000 == 0x20000) {
+        apply(ofpat_push_vlan);
+    }
+
+    if (openflow_metadata.bmap & 0x2000000 == 0x2000000) {
+        apply(ofpat_set_field);
+    }
+#endif /* OPENFLOW_ENABLE_VLAN */
+#ifdef OPENFLOW_ENABLE_L3
+    if (openflow_metadata.bmap & 0x1000000 == 0x1000000) {
+        if ((valid(ipv4))) {
+            apply(ofpat_dec_nw_ttl_ipv4);
+        } else {
+            if ((valid(ipv6))) {
+                apply(ofpat_dec_nw_ttl_ipv6);
+            }
+        }
+    }
+
+    if (openflow_metadata.bmap & 0x800000 == 0x800000) {
+        if (valid(ipv4)) {
+            apply(ofpat_set_nw_ttl_ipv4);
+        } else {
+            if (valid(ipv6)) {
+                apply(ofpat_set_nw_ttl_ipv6);
+            }
+        }
+    }
+#endif /* OPENFLOW_ENABLE_L3 */
+
     // oq (set queue)
 }
 

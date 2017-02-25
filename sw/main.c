@@ -1,6 +1,3 @@
-// FuZhou University, SDNLab.
-// Added by Chen. 2017/2/24
-
 #include <errno.h>
 #include <stdlib.h>
 #include <string.h>
@@ -20,9 +17,11 @@ int main() {
     add_to_rpc_server(pd_server_cookie);
 
     p4_pd_init();
-    p4_pd_control_target_init();
-    p4_pd_control_target_assign_device(0,
+    p4_pd_switch_bmv2_init();
+    p4_pd_switch_bmv2_assign_device(0,
     "ipc:///tmp/bmv2-0-notifications.ipc", 22222);
+    p4_pd_switch_bmv2_assign_device(1,
+    "ipc:///tmp/bmv2-1-notifications.ipc", 22223);
 
     #ifdef OPENFLOW_ENABLE
     p4ofagent_init(of_ipv6, of_controller_str);
