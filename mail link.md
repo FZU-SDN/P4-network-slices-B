@@ -1,4 +1,16 @@
-## mail link
+## Mail link
+
+* [2016.11](http://lists.p4.org/pipermail/p4-dev_lists.p4.org/2016-November/thread.html)
+
+* [2016.12](http://lists.p4.org/pipermail/p4-dev_lists.p4.org/2016-December/thread.html)
+
+* [2017.1](http://lists.p4.org/pipermail/p4-dev_lists.p4.org/2017-January/thread.html)
+
+* [2017.2](http://lists.p4.org/pipermail/p4-dev_lists.p4.org/2017-February/thread.html)
+
+* [2017.3](http://lists.p4.org/pipermail/p4-dev_lists.p4.org/2017-March/thread.htm)
+
+## spec
 
 [P4-dev] Error on building soft switch with openflow agent
 
