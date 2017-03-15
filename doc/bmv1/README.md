@@ -19,7 +19,7 @@ sudo apt-get install Python-pip build-essential python-dev libxml2-dev libxslt1-
 sudo pip install -U pip six oslo.config==3.0.0 eventlet msgpack-python
 
 git clone git://github.com/osrg/ryu.git
-cd ./ryu
+cd ryu
 python ./setup.py install
 
 ryu-manager
