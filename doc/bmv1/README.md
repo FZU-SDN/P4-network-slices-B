@@ -16,10 +16,9 @@ sudo apt-get install git
 
 sudo apt-get install Python-pip build-essential python-dev libxml2-dev libxslt1-dev python-paramiko python-webob python-routes
 
-sudo pip install -U pip six oslo.config==3.0.0 eventlet msgpack-python
-
 git clone git://github.com/osrg/ryu.git
 cd ryu
+sudo pip install -r tools/pip-requires
 python ./setup.py install
 
 ryu-manager
