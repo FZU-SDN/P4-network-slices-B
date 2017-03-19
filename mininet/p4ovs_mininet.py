@@ -731,10 +731,19 @@ class P4OvS(Switch):
     def __init__( self, name, sw_path, thrift_port = None,
                   pcap_dump = False, verbose = False, 
                   failMode='secure', datapath='kernel',
-                  inband=False, protocols=None,
+                  inband=False, protocols='OpenFlow13',
                   reconnectms=1000, stp=False, batch=False, **params ):
+        """name: name for switch
+           failMode: controller loss behavior (secure|standalone)
+           datapath: userspace or kernel mode (kernel|user)
+           inband: use in-band control (False)
+           protocols: use specific OpenFlow version(s) (e.g. OpenFlow13)
+                      Unspecified (or old OVS version) uses OVS default
+           reconnectms: max reconnect timeout in ms (0/None for default)
+           stp: enable STP (False, requires failMode=standalone)
+           batch: enable batch startup (False)"""
         Switch.__init__( self, name, **params )
-        
+
         # P4vSwitch features
         # self.dpid = self.defaultDpid( dpid ) # overrides
         self.sw_path = sw_path

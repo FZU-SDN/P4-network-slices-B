@@ -1,20 +1,5 @@
-# Copyright 2013-present Barefoot Networks, Inc.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#   http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
-
 from mininet.net import Mininet
-from mininet.node import Switch, Host
+from mininet.node import Switch, Host, OVSSwitch
 from mininet.log import setLogLevel, info, error, debug
 from mininet.moduledeps import pathCheck
 from sys import exit
@@ -22,38 +7,15 @@ import os
 import tempfile
 import socket
 
-class P4Host(Host):
-    def config(self, **params):
-        r = super(Host, self).config(**params)
-
-        self.defaultIntf().rename("eth0")
-
-        for off in ["rx", "tx", "sg"]:
-            cmd = "/sbin/ethtool --offload eth0 %s off" % off
-            self.cmd(cmd)
-
-        # disable IPv6
-        self.cmd("sysctl -w net.ipv6.conf.all.disable_ipv6=1")
-        self.cmd("sysctl -w net.ipv6.conf.default.disable_ipv6=1")
-        self.cmd("sysctl -w net.ipv6.conf.lo.disable_ipv6=1")
-
-        return r
-
-    def describe(self):
-        print "**********"
-        print self.name
-        print "default interface: %s\t%s\t%s" %(
-            self.defaultIntf().name,
-            self.defaultIntf().IP(),
-            self.defaultIntf().MAC()
-        )
-        print "**********"
-
-class P4Switch(Switch):
+class P4Switch(OVSSwitch):
     """P4 virtual switch"""
     device_id = 0
 
-    def __init__(self, name, sw_path = None, json_path = None,
+    def __init__(self, name, #failMode='secure', datapath='kernel',
+                 #inband=False, protocols=None,
+                 #reconnectms=1000, stp=False, batch=False,
+                 sw_path = None, 
+                 json_path = None,
                  thrift_port = None,
                  pcap_dump = False,
                  log_console = False,
@@ -61,7 +23,7 @@ class P4Switch(Switch):
                  device_id = None,
                  enable_debugger = False,
                  **kwargs):
-        Switch.__init__(self, name, **kwargs)
+        OVSSwitch.__init__(self, name, **kwargs)
         assert(sw_path)
         assert(json_path)
         # make sure that the provided sw_path is valid
@@ -107,6 +69,7 @@ class P4Switch(Switch):
 
     def start(self, controllers):
         "Start up a new P4 switch"
+        OVSSwitch.start(self, controllers)
         info("Starting P4 switch {}.\n".format(self.name))
         args = [self.sw_path]
         for port, intf in self.intfs.items():
@@ -142,15 +105,16 @@ class P4Switch(Switch):
 
     def stop(self):
         "Terminate P4 switch."
+        OVSSwitch.stop(self)
         self.output.flush()
         self.cmd('kill %' + self.sw_path)
         self.cmd('wait')
         self.deleteIntfs()
-
-    def attach(self, intf):
+    
+    """def attach(self, intf):
         "Connect a data port"
         assert(0)
 
     def detach(self, intf):
         "Disconnect a data port"
-        assert(0)
+        assert(0)"""
