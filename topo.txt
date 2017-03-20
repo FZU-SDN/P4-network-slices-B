@@ -1,2 +1,0 @@
-switches [switches_num]
-hosts [hosts_num]
