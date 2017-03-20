@@ -31,7 +31,7 @@ This repo is based on the [slices_demo5](https://github.com/Emil-501/P4-network-
 To get start, first start your own controller and record the IP address and its port number(eg.6633 in this target), then add controller to [topo.py](https://github.com/Emil-501/P4-network-slices-B/blob/master/Demo/topo.py#L98) here with using the function:
 
 ```
-net.addController([controller_name], controller=RemoteController, ip=[yourcontroller_IP], port=[yourcontroller_port])`. 
+net.addController([controller_name], controller=RemoteController, ip=[yourcontroller_IP], port=[yourcontroller_port])
 ```
 
 We don't recommend to use the original controller that mininet offered because it will mess the table entries.
