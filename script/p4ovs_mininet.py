@@ -109,10 +109,10 @@ class P4Switch(OVSSwitch):
         self.cmd('wait')
         self.deleteIntfs()
 
-    def attach(self, intf):
+    """def attach(self, intf):
         "Connect a data port"
         assert(0)
 
     def detach(self, intf):
         "Disconnect a data port"
-        assert(0)
+        assert(0)"""

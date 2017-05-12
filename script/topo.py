@@ -4,8 +4,9 @@ from mininet.net import Mininet
 from mininet.topo import Topo
 from mininet.log import setLogLevel, info
 from mininet.cli import CLI
+from mininet.node import OVSController, RemoteController
 
-from p4ovs_mininet import P4OvS, P4Host
+from p4ovs_mininet import P4Switch
 
 import argparse
 from time import sleep
@@ -26,6 +27,9 @@ parser.add_argument('--mode', choices=['l2', 'l3'], type=str, default='l3')
 
 args = parser.parse_args()
 
+# Use to config the hosts
+hosts = []
+
 class MyTopo(Topo):
     def __init__(self, sw_path, json_path, nb_hosts, nb_switches, links, **opts):
         # Initialize topology and default options
@@ -39,13 +43,26 @@ class MyTopo(Topo):
                             thrift_port = thrift_port,
                             pcap_dump = True,
                             device_id = i)
-
+        
         for h in xrange(nb_hosts):
-            self.addHost('h%d' % (h + 1), ip="10.0.0.%d" % (h + 1),
-                    mac="00:00:00:00:00:0%d" % (h+1))
+            hi = self.addHost('h%d' % (h + 1))
+            hosts.append(hi)
 
-        for a, b in links:
-            self.addLink(a, b)
+def Connect(net, links):
+    # Connect the elements on the DataPlane.
+    for i, j in links:
+        print i, j
+        a = net.get(i)
+        b = net.get(j)
+        net.addLink(a, b)
+
+def HostConfig(net, nb_hosts):
+    # Config the hosts by IP and MAC address
+    for i in xrange(nb_hosts):
+        print 'Config hosts h%d' % (i+1)
+        obj = net.get(hosts[i])
+        obj.setIP("10.0.0.%d" % (i+1))
+        obj.setMAC("00:00:00:00:00:0%d" % (i+1))
 
 def read_topo():
     nb_hosts = 0
@@ -64,7 +81,6 @@ def read_topo():
             links.append( (a, b) )
     return int(nb_hosts), int(nb_switches), links
 
-
 def main():
     nb_hosts, nb_switches, links = read_topo()
     
@@ -75,9 +91,17 @@ def main():
                   nb_hosts, nb_switches, links)
 
     net = Mininet(topo = topo,
-                  host = P4Host,
-                  switch = P4OvS,
-                  controller = None )
+                  switch = P4Switch,
+                  # controller = RemoteController)
+                  controller = None) # OVSController)
+    
+    # [Option] TODO: Add your own SDN Controller using net.addController()
+    
+    # ...
+    
+    Connect(net, links)
+    HostConfig(net, nb_hosts)
+    
     net.start()
 
     for n in xrange(nb_hosts):
@@ -103,7 +127,7 @@ def main():
 
     for n in xrange(nb_hosts):
         h = net.get('h%d' % (n + 1))
-	h.describe()
+	#h.describe()
 
     sleep(1)
 
@@ -114,4 +138,4 @@ def main():
 
 if __name__ == '__main__':
     setLogLevel( 'info' )
-main()
+    main()
